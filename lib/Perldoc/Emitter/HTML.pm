@@ -1,14 +1,11 @@
 package Perldoc::Emitter::HTML;
-use strict;
-use warnings;
-use Perldoc::Base;
-use base 'Perldoc::Base';
+use Mouse;
 
 use HTML::Entities;
 my $prev_text;
 my $li_level = 0;
 
-field 'document';
+has document => (is => 'ro');
 
 my $tag_map = {
     top  => 'body',

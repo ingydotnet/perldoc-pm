@@ -1,7 +1,5 @@
 package Perldoc::Convert;
-use strict;
-use warnings;
-use Perldoc::Base -base;
+use Mouse;
 
 sub kwid_to_html {
     my $self = shift;

@@ -1,18 +1,18 @@
 use inc::Module::Install;
 
-name            'Perldoc';
-all_from        'lib/Perldoc.pm';
+# perldoc_make_pod;
+all_from 'lib/Perldoc.pm';
+# readme_from 'lib/Perldoc.pod';
+manifest_skip;
+version_check;
+ack_xxx;
 
-requires        'perl' => '5.6.1';
-requires        'IO::All' => '0.38';
-requires        'Class::Field' => '0.10';
+requires 'Mouse';
+requires 'YAML::XS';
+requires 'IO::All';
 
 use_test_base;
 
-# manifest_skip   'Stories';
-
-perldoc;
-
-install_script  'perl-doc';
+install_script 'bin/perl-doc';
 
 WriteAll;
