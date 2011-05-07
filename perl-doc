@@ -9,10 +9,12 @@ if ($options->{version}) {
     warn "This is perl-doc version '$Perldoc::VERSION'\n";
 }
 elsif ($options->{'kwid-to-html'}) {
+    no warnings;
+    require Perldoc::Convert;
     my @args = $input_file
-    ? (filepath => $input_file)
-    : (filehandle => \*STDIN);
-    print Perldoc->kwid_to_html(@args);
+    ? (input_filepath => $input_file)
+    : (input_filehandle => \*STDIN);
+    print Perldoc::Convert->kwid_to_html(@args);
 }
 else {
     warn usage();

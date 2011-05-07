@@ -1,9 +1,12 @@
 use t::TestPerldoc tests => 1;
 
+use Perldoc::Convert;
+
+no_diff;
 run_is kwid => 'html';
 
 sub to_html {
-    Perldoc->kwid_to_html(string => @_);
+    Perldoc::Convert->kwid_to_html(input_string => @_);
 }
 
 __DATA__
@@ -22,27 +25,17 @@ really *rocks*.
 <h1>
 Intro to Kwid
 </h1>
-<p>
 
-This is _Kwid_!! It
-really 
-<b>
-rocks
-</b>
-.
-</p>
 <p>
-<li>
-Love
-</li>
-<li>
-Your
-</li>
-<li>
+This is _Kwid_!! It
+really <b>
+rocks</b>
+.<p>
+<ul><li>
+Love</li><li>
+Your</li><li>
 <b>
-Parser
-</b>
-</li>
-</p>
+Parser</b>
+</li></ul>
 </body>
 

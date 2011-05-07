@@ -1,53 +1,88 @@
 package Perldoc::Emitter::HTML;
-use Perldoc::Base -Base;
-use Perldoc::Writer;
+use strict;
+use warnings;
+use Perldoc::Base;
+use base 'Perldoc::Base';
 
 use HTML::Entities;
 my $prev_text;
+my $li_level = 0;
 
-field 'writer';
+field 'document';
 
-sub init {
-    my $writer = Perldoc::Writer->new(@_);
-    $self->writer($writer);
-    return $self;
-}
+my $tag_map = {
+    top  => 'body',
+    item => 'li',
+    para => 'p',
+    bold => 'b',
+    italic => 'i',
+};
 
-sub begins {
-    my $tag = shift;
+sub begin {
+    my $self = shift;
+    my $type = shift;
+    my $tag = $tag_map->{$type} || $type;
     $tag =~ s/ .*//;
+    if ($tag =~ s/^li(\d+)/li/) {
+        $self->emit_li($1 - $li_level) if $li_level or $1;
+        $li_level = $1;
+        undef $prev_text;
+        return;
+    }
+
     my $output = 
         $tag eq 'comment' ? "<!--\n" :
         $tag eq 'a'       ? '<a href="' :
                             "<$tag>\n";
-    $self->writer->print($output);
+    $self->document->write($output);
     undef $prev_text;
 }
-sub ends {
-    my $tag = shift;
+
+sub end {
+    my $self = shift;
+    my $type = shift;
+    my $tag = $tag_map->{$type} || $type;
     my $output = '';
     if ($tag eq 'comment') {
         $output .= "-->\n";
     }
     elsif ($tag =~ /a (.*)/) {
+        no warnings 'uninitialized';
         $output .= $1 unless defined $prev_text;
         $output .= '">';
         $output .= (length($1) ? $1 : $prev_text);
         $output .= '</a>';
     }
-    else {
+    elsif ($tag eq 'p') {
+        $self->document->write("</li></ul>\n") for 1..$li_level;
+        $li_level = 0;
+    }
+    elsif ($tag !~ /^li\d+/) {
         $output .= "</$tag>\n"
     }
-    $self->writer->print($output);
+    $self->document->write($output);
 }
+
 sub text {
+    my $self = shift;
     my $output = shift;
-    $output =~ s/\\(.)/$1/g;
+    $output =~ s/\\(\W)/$1/g;
     decode_entities($output);
     encode_entities($output, '<>&"');
     $prev_text = $output;
-    $output .= "\n";
-    $self->writer->print($output);
+    $self->document->write($output);
+}
+
+sub emit_li {
+    my $self = shift;
+    my $level = shift;
+    if ($level <= 0) {
+        $self->document->write("</li></ul>\n") for $level..-1;
+        $self->document->write("</li><li>\n");
+    }
+    else {
+        $self->document->write("<ul><li>\n") for 1..$level;
+    }
 }
 
 =head1 NAME
